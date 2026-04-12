@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepo extends JpaRepository<Order, Integer> {
+    @EntityGraph(attributePaths = {"orderItems", "orderItems.product"})
     Optional<Order> findByOrderId(String orderId);
 
     @EntityGraph(attributePaths = {"orderItems", "orderItems.product"})

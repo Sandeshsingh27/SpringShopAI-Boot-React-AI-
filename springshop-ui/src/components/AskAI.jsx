@@ -5,7 +5,6 @@ import {
   ChatContainer,
   MessageList,
   Message,
-  MessageInput,
   TypingIndicator
 } from '@chatscope/chat-ui-kit-react';
 
@@ -13,8 +12,10 @@ function AskAi() {
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
+  const [inputText, setInputText] = useState('');
   const conversationIdRef = useRef(crypto.randomUUID());
   const abortControllerRef = useRef(null);
+  const inputRef = useRef(null);
 
   // Prefer env var; fallback helps during local dev
   const baseUrl = import.meta.env.VITE_BASE_URL ?? 'http://localhost:8080';
@@ -161,8 +162,8 @@ function AskAi() {
               </span>
             </div>
 
-            <div className="card-body p-0" style={{ height: "calc(100% - 56px)" }}>
-              <MainContainer style={{ height: "100%" }}>
+            <div className="card-body p-0" style={{ height: "calc(100% - 56px)", display: "flex", flexDirection: "column" }}>
+              <MainContainer style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
                 <ChatContainer style={{ height: "100%" }}>
                   <MessageList
                     scrollBehavior="smooth"
@@ -177,51 +178,96 @@ function AskAi() {
                       />
                     ))}
                   </MessageList>
-
-                  {isTyping ? (
-                    <div
-                      as="MessageInput"
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        padding: "12px",
-                        borderTop: "1px solid #e2e8f0",
-                        background: "#f8fafc"
-                      }}
-                    >
-                      <button
-                        onClick={handleStop}
-                        className="btn"
-                        style={{
-                          background: "linear-gradient(135deg, #ef4444, #dc2626)",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "24px",
-                          padding: "8px 28px",
-                          fontWeight: "600",
-                          fontSize: "0.9rem",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                          boxShadow: "0 2px 8px rgba(239,68,68,0.3)",
-                          transition: "all 0.2s ease"
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
-                        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-                      >
-                        <i className="bi bi-stop-circle-fill"></i>
-                        Stop Generating
-                      </button>
-                    </div>
-                  ) : (
-                    <MessageInput
-                      placeholder="Type your message here..."
-                      onSend={handleSend}
-                      attachButton={false}
-                    />
-                  )}
                 </ChatContainer>
               </MainContainer>
+
+              {/* Custom input bar — always visible */}
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 14px",
+                borderTop: "1px solid #e2e8f0",
+                background: "#f8fafc"
+              }}>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  className="form-control"
+                  placeholder="Type your message here..."
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !isTyping && inputText.trim()) {
+                      handleSend(inputText.trim());
+                      setInputText('');
+                    }
+                  }}
+                  style={{
+                    borderRadius: "20px",
+                    padding: "10px 16px",
+                    fontSize: "0.9rem",
+                    border: "1px solid #d1d5db",
+                    flex: 1
+                  }}
+                />
+
+                {isTyping && (
+                  <button
+                    onClick={handleStop}
+                    className="btn btn-sm"
+                    title="Stop generating"
+                    style={{
+                      background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: "36px",
+                      height: "36px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      boxShadow: "0 2px 6px rgba(239,68,68,0.3)",
+                      transition: "transform 0.15s ease"
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
+                    onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                  >
+                    <i className="bi bi-stop-fill" style={{ fontSize: "1rem" }}></i>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    if (!isTyping && inputText.trim()) {
+                      handleSend(inputText.trim());
+                      setInputText('');
+                    }
+                  }}
+                  disabled={isTyping || !inputText.trim()}
+                  className="btn btn-sm"
+                  title="Send message"
+                  style={{
+                    background: isTyping || !inputText.trim()
+                      ? "#d1d5db"
+                      : "linear-gradient(135deg, #4f46e5, #7c3aed)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "50%",
+                    width: "36px",
+                    height: "36px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    transition: "all 0.15s ease",
+                    cursor: isTyping || !inputText.trim() ? "not-allowed" : "pointer"
+                  }}
+                >
+                  <i className="bi bi-send-fill" style={{ fontSize: "0.85rem" }}></i>
+                </button>
+              </div>
             </div>
 
             {error && (

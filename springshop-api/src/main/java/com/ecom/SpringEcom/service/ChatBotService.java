@@ -14,6 +14,7 @@ import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;
@@ -50,6 +51,7 @@ public class ChatBotService {
         }
     }
 
+    @Transactional(readOnly = true)
     public String getBotResponse(String userQuery) {
         String context = buildFullContext(userQuery);
 
@@ -68,6 +70,7 @@ public class ChatBotService {
     /**
      * Streaming version: returns a Flux of tokens (SSE) with conversation memory.
      */
+    @Transactional(readOnly = true)
     public Flux<String> streamBotResponse(String userQuery, String conversationId) {
         String context = buildFullContext(userQuery);
 
