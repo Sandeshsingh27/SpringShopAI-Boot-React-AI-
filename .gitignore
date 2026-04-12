@@ -1,0 +1,74 @@
+# ========================
+# Java / Spring Boot
+# ========================
+*.class
+*.jar
+*.war
+*.ear
+*.log
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Spring Boot
+*.pid
+
+# ========================
+# Node / React / Vite
+# ========================
+node_modules/
+dist/
+build/
+*.local
+
+# ========================
+# Python virtual env
+# ========================
+venv/
+__pycache__/
+*.pyc
+
+# ========================
+# IDE
+# ========================
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.swp
+*.swo
+*~
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
+__MACOSX/
+
+# ========================
+# Environment / Secrets
+# ========================
+.env
+.env.local
+.env.*.local
+
+# ========================
+# Docker
+# ========================
+docker-compose.override.yml
+
+# ========================
+# Misc
+# ========================
+*.bak
+*.tmp
+*.temp
+
+
