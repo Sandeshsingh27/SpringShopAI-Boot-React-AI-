@@ -92,6 +92,36 @@ public class ProductService {
         return productRepo.searchProducts(keyword);
     }
 
+    public String generateProduct(String query) {
+
+        String prompt = String.format("""
+                Based on the following description, generate a JSON object for an e-commerce product.
+                
+                Description: %s
+                
+                Return ONLY a valid JSON object with these exact fields (no markdown, no extra text):
+                {
+                  "name": "product name",
+                  "brand": "brand name",
+                  "description": "short product description under 250 chars",
+                  "price": 0.00,
+                  "category": "one of: Laptop, Headphone, Mobile, Electronics, Toys, Fashion, Other",
+                  "stockQuantity": 0,
+                  "releaseDate": "YYYY-MM-DD",
+                  "productAvailable": true
+                }
+                
+                Use realistic values. Return ONLY the JSON, nothing else.
+                """, query);
+
+        return chatClient.prompt(prompt)
+                .call()
+                .chatResponse()
+                .getResult()
+                .getOutput()
+                .getText();
+    }
+
     public String generateDescription(String name, String category) {
 
         String descPrompt = String.format("""

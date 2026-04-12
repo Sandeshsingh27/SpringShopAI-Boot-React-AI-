@@ -310,20 +310,28 @@ const AddProduct = () => {
     
     try {
       const response = await axios.post(`${baseUrl}/api/product/generate-product?query=${encodeURIComponent(aiPrompt)}`);
-      console.log(response, 'generated response');
       
       if (response.data) {
-        const generatedProduct = response.data;
+        let generatedProduct = response.data;
+        
+        // If the response is a string (AI may return JSON wrapped in markdown), parse it
+        if (typeof generatedProduct === 'string') {
+          // Strip markdown code fences if present
+          let cleaned = generatedProduct.trim();
+          cleaned = cleaned.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '');
+          generatedProduct = JSON.parse(cleaned);
+        }
+        
         // Set the generated product data to form
         setProduct({
           name: generatedProduct.name || "",
           brand: generatedProduct.brand || "",
           description: generatedProduct.description || "",
-          price: generatedProduct.price || "",
+          price: generatedProduct.price ? String(generatedProduct.price) : "",
           category: generatedProduct.category || "",
-          stockQuantity: generatedProduct.stockQuantity || "",
+          stockQuantity: generatedProduct.stockQuantity ? String(generatedProduct.stockQuantity) : "",
           releaseDate: generatedProduct.releaseDate || "",
-          productAvailable: generatedProduct.productAvailable || false,
+          productAvailable: generatedProduct.productAvailable ?? false,
         });
         toast.success('Product generated successfully!');
       }
@@ -332,7 +340,7 @@ const AddProduct = () => {
       setShowModal(false);
       setAiPrompt("");
     } catch (error) {
-      console.log(error);
+      console.error("Error generating product:", error);
       toast.error("Error generating product. Please try again.");
     } finally {
       setGeneratingProduct(false);

@@ -10,7 +10,9 @@ const Navbar = ({ onSelectCategory }) => {
   const [showNoProductsMessage, setShowNoProductsMessage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isNavCollapsed, setIsNavCollapsed] = useState(true);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const navbarRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const navigate = useNavigate();
   const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -19,6 +21,10 @@ const Navbar = ({ onSelectCategory }) => {
     const handleClickOutside = (event) => {
       if (navbarRef.current && !navbarRef.current.contains(event.target)) {
         setIsNavCollapsed(true);
+        setShowCategoryDropdown(false);
+      }
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowCategoryDropdown(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -26,7 +32,10 @@ const Navbar = ({ onSelectCategory }) => {
   }, []);
 
   const handleNavbarToggle = () => setIsNavCollapsed(!isNavCollapsed);
-  const handleLinkClick = () => setIsNavCollapsed(true);
+  const handleLinkClick = () => {
+    setIsNavCollapsed(true);
+    setShowCategoryDropdown(false);
+  };
 
   const handleInputChange = (value) => setInput(value);
 
@@ -55,7 +64,9 @@ const Navbar = ({ onSelectCategory }) => {
 
   const handleCategorySelect = (category) => {
     onSelectCategory(category);
+    setShowCategoryDropdown(false);
     setIsNavCollapsed(true);
+    navigate("/");
   };
 
   const categories = [
@@ -102,17 +113,20 @@ const Navbar = ({ onSelectCategory }) => {
               </Link>
             </li>
 
-            <li className="nav-item dropdown">
+            <li className="nav-item dropdown" ref={dropdownRef}>
               <a
                 className="nav-link dropdown-toggle"
                 href="#"
                 role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowCategoryDropdown(!showCategoryDropdown);
+                }}
+                aria-expanded={showCategoryDropdown}
               >
                 <i className="bi bi-grid me-1"></i>Categories
               </a>
-              <ul className="dropdown-menu">
+              <ul className={`dropdown-menu${showCategoryDropdown ? ' show' : ''}`}>
                 <li>
                   <button className="dropdown-item" onClick={() => handleCategorySelect("")}>
                     All Products

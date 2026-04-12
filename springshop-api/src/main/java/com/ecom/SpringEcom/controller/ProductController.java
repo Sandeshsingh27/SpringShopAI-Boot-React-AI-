@@ -48,6 +48,18 @@ public class ProductController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @PostMapping("/product/generate-product")
+    public ResponseEntity<String> generateProduct(@RequestParam String query){
+        try{
+            String aiProduct = productService.generateProduct(query);
+            return ResponseEntity.ok()
+                    .header("Content-Type", "application/json")
+                    .body(aiProduct);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/product/generate-description")
     public ResponseEntity<String> generateDescription(@RequestParam String name, @RequestParam String category){
 
@@ -78,7 +90,7 @@ public class ProductController {
 
 
     @PostMapping("/product")
-    public ResponseEntity<?> addProduct(@RequestPart Product product, @RequestPart MultipartFile imageFile){
+    public ResponseEntity<?> addProduct(@RequestPart Product product, @RequestPart(required = false) MultipartFile imageFile){
         Product savedProduct = null;
         try {
             savedProduct = productService.addOrUpdateProduct(product, imageFile);
