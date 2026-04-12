@@ -1,4 +1,4 @@
-package com.telusko.SpringEcom.model;
+package com.ecom.SpringEcom.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;

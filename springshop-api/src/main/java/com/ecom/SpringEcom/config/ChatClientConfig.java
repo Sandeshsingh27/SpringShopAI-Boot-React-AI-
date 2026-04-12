@@ -1,4 +1,4 @@
-package com.telusko.SpringEcom.config;
+package com.ecom.SpringEcom.config;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;

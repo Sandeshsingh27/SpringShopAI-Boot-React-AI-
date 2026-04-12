@@ -1,4 +1,4 @@
-package com.telusko.SpringEcom.model.dto;
+package com.ecom.SpringEcom.model.dto;
 
 import java.util.List;
 

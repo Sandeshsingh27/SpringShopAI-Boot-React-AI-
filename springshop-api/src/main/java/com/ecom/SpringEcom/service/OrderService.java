@@ -1,14 +1,14 @@
-package com.telusko.SpringEcom.service;
+package com.ecom.SpringEcom.service;
 
-import com.telusko.SpringEcom.model.Order;
-import com.telusko.SpringEcom.model.OrderItem;
-import com.telusko.SpringEcom.model.Product;
-import com.telusko.SpringEcom.model.dto.OrderItemRequest;
-import com.telusko.SpringEcom.model.dto.OrderItemResponse;
-import com.telusko.SpringEcom.model.dto.OrderRequest;
-import com.telusko.SpringEcom.model.dto.OrderResponse;
-import com.telusko.SpringEcom.repo.OrderRepo;
-import com.telusko.SpringEcom.repo.ProductRepo;
+import com.ecom.SpringEcom.model.Order;
+import com.ecom.SpringEcom.model.OrderItem;
+import com.ecom.SpringEcom.model.Product;
+import com.ecom.SpringEcom.model.dto.OrderItemRequest;
+import com.ecom.SpringEcom.model.dto.OrderItemResponse;
+import com.ecom.SpringEcom.model.dto.OrderRequest;
+import com.ecom.SpringEcom.model.dto.OrderResponse;
+import com.ecom.SpringEcom.repo.OrderRepo;
+import com.ecom.SpringEcom.repo.ProductRepo;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;

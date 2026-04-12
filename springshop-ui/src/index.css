@@ -1,0 +1,5 @@
+/* Preserve newlines in chatbot AI responses */
+.cs-message__content {
+  white-space: pre-wrap !important;
+}
+

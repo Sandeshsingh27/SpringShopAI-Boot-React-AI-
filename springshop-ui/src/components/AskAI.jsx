@@ -138,6 +138,7 @@ function AskAi() {
                         key={i}
                         model={m}
                         className={m.error ? "error-message" : ""}
+                        style={{ whiteSpace: "pre-wrap" }}
                       />
                     ))}
                   </MessageList>

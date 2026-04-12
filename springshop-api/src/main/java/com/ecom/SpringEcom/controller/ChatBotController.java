@@ -1,7 +1,7 @@
-package com.telusko.SpringEcom.controller;
+package com.ecom.SpringEcom.controller;
 
-import com.telusko.SpringEcom.model.dto.ChatRequest;
-import com.telusko.SpringEcom.service.ChatBotService;
+import com.ecom.SpringEcom.model.dto.ChatRequest;
+import com.ecom.SpringEcom.service.ChatBotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

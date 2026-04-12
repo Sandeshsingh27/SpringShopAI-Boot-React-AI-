@@ -1,4 +1,4 @@
-package com.telusko.SpringEcom.model;
+package com.ecom.SpringEcom.model;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;

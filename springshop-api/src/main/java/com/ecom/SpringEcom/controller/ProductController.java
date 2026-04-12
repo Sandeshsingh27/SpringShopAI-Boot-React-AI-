@@ -1,7 +1,7 @@
-package com.telusko.SpringEcom.controller;
+package com.ecom.SpringEcom.controller;
 
-import com.telusko.SpringEcom.model.Product;
-import com.telusko.SpringEcom.service.ProductService;
+import com.ecom.SpringEcom.model.Product;
+import com.ecom.SpringEcom.service.ProductService;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

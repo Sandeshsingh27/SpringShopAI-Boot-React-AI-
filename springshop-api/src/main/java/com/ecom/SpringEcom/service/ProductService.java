@@ -1,7 +1,7 @@
-package com.telusko.SpringEcom.service;
+package com.ecom.SpringEcom.service;
 
-import com.telusko.SpringEcom.model.Product;
-import com.telusko.SpringEcom.repo.ProductRepo;
+import com.ecom.SpringEcom.model.Product;
+import com.ecom.SpringEcom.repo.ProductRepo;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
