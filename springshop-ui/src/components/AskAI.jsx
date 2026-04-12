@@ -22,7 +22,7 @@ function AskAi() {
   useEffect(() => {
     setMessages([
       {
-        message: "Hello, I'm your personal AI!",
+        message: "Hello! I'm SpringShop AI assistant. How can I help you today?",
         sender: "AI",
         direction: "incoming"
       }

@@ -1,6 +1,6 @@
-# 🛒 ECom – Full-Stack E-Commerce Application with AI-Powered Chatbot (Ollama)
+# 🛒 SpringShop AI – Full-Stack E-Commerce Application with AI-Powered Chatbot
 
-A full-stack e-commerce web application built with **Spring Boot** (backend) and **React + Vite** (frontend), featuring an **AI-powered customer service chatbot** using **Spring AI**, **Ollama** (local LLM), and **RAG (Retrieval-Augmented Generation)** with **PgVector** for semantic search.
+A full-stack e-commerce web application built with **Spring Boot** (backend — `springshop-api`) and **React + Vite** (frontend — `springshop-ui`), featuring an **AI-powered customer service chatbot** using **Spring AI**, **Ollama** (local LLM), and **RAG (Retrieval-Augmented Generation)** with **PgVector** for semantic search.
 
 > **Runs 100% locally** — no paid API keys needed. Uses Ollama for chat (Llama 3.2/mistral) and embeddings (nomic-embed-text).
 
@@ -130,7 +130,7 @@ Before running the project, make sure you have the following installed:
 
 ```bash
 git clone <repository-url>
-cd ECom_SpringBoot_With_IntelligentChatBot
+cd SpringShopAI
 ```
 
 ### 2. Install & Set Up Ollama
@@ -175,7 +175,7 @@ You should see both `llama3.2` and `nomic-embed-text` listed. Ollama serves on *
 Make sure Docker Desktop is running, then:
 
 ```bash
-cd SpringEcomAI
+cd springshop-api
 docker-compose up -d
 ```
 
@@ -189,7 +189,7 @@ This spins up a **PostgreSQL 16** instance with the **PgVector** extension on po
 #### b. Run the Backend
 
 ```bash
-cd SpringEcomAI
+cd springshop-api
 
 # Using Maven Wrapper (recommended)
 ./mvnw spring-boot:run        # Linux/macOS
@@ -207,7 +207,7 @@ On first startup, the app will:
 
 #### c. (Optional) Insert Sample Data
 
-You can manually insert sample products using the SQL in `SpringEcomAI/src/main/resources/insert-data`:
+You can manually insert sample products using the SQL in `springshop-api/src/main/resources/insert-data`:
 
 ```sql
 INSERT INTO product (name, description, brand, price, category, release_date, product_available, stock_quantity) VALUES
@@ -222,7 +222,7 @@ INSERT INTO product (name, description, brand, price, category, release_date, pr
 ### 4. Set Up the Frontend (React)
 
 ```bash
-cd t-ecom
+cd springshop-ui
 
 # Install dependencies
 npm install
@@ -276,9 +276,9 @@ The frontend will start at **http://localhost:5173**.
 ## Project Structure
 
 ```
-ECom_SpringBoot_With_IntelligentChatBot/
+SpringShopAI/
 │
-├── SpringEcomAI/                          # Backend (Spring Boot)
+├── springshop-api/                        # Backend (Spring Boot)
 │   ├── docker-compose.yml                 # PostgreSQL + PgVector container
 │   ├── pom.xml                            # Maven dependencies (Ollama + PgVector)
 │   ├── mvnw / mvnw.cmd                   # Maven wrapper
@@ -290,7 +290,7 @@ ECom_SpringBoot_With_IntelligentChatBot/
 │       │   ├── controller/
 │       │   │   ├── ProductController.java # Product REST API
 │       │   │   ├── OrderController.java   # Order REST API
-│       │   │   ├── ChatBotController.java # Chatbot REST API
+│       │   │   ├── ChatBotController.java # Chatbot REST API (+ SSE streaming)
 │       │   │   └── HelloController.java   # Health check
 │       │   ├── model/
 │       │   │   ├── Product.java           # Product entity
@@ -310,7 +310,7 @@ ECom_SpringBoot_With_IntelligentChatBot/
 │           └── prompts/
 │               └── chatbot-rag-prompt.st  # Chatbot system prompt template
 │
-├── t-ecom/                                # Frontend (React + Vite)
+├── springshop-ui/                         # Frontend (React + Vite)
 │   ├── package.json                       # Node dependencies
 │   ├── vite.config.js                     # Vite configuration
 │   └── src/
@@ -326,7 +326,7 @@ ECom_SpringBoot_With_IntelligentChatBot/
 │       │   ├── Cart.jsx                   # Shopping cart
 │       │   ├── CheckoutPopup.jsx          # Checkout modal
 │       │   ├── Order.jsx                  # Order history
-│       │   ├── AskAI.jsx                  # AI Chatbot interface
+│       │   ├── AskAI.jsx                  # AI Chatbot interface (SSE streaming)
 │       │   └── SearchResults.jsx          # Product search results
 │       └── Context/
 │           └── Context.jsx                # React Context (global state)
@@ -338,7 +338,7 @@ ECom_SpringBoot_With_IntelligentChatBot/
 
 ## 🔧 Using a Different Ollama Model
 
-You can swap models by editing `SpringEcomAI/src/main/resources/application.properties`:
+You can swap models by editing `springshop-api/src/main/resources/application.properties`:
 
 ```properties
 # Chat model – try larger models for better quality
@@ -363,11 +363,4 @@ spring.ai.ollama.embedding.options.model=nomic-embed-text  # 768 dims
 - **AI image generation is not available** with Ollama. The "Generate with AI" image button on the frontend will return an error. Upload product images manually instead.
 - AI description generation works fully with Ollama (Llama 3.2).
 - File uploads support up to **100MB** per file.
-- The app uses **Spring Boot Docker Compose** integration — if Docker is running, it will automatically start the PostgreSQL container defined in `docker-compose.yml`.
-- First requests to Ollama may be slow as the model loads into memory. Subsequent requests are much faster.
-
----
-
-## 📜 License
-
-This project is for educational/demo purposes.
+- The app uses **Spring Boot Docker Compose** integration — if Docker is running, it will automatically start the PostgreSQL container

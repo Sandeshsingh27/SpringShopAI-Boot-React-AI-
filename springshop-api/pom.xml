@@ -8,11 +8,11 @@
 		<version>3.3.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.telusko</groupId>
-	<artifactId>SpringEcom</artifactId>
+	<groupId>com.ecom</groupId>
+	<artifactId>SpringShopAI</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>SpringEcom</name>
-	<description>Demo project for Spring Boot</description>
+	<name>SpringShop AI</name>
+	<description>SpringShop AI – Full-stack e-commerce platform with RAG-powered chatbot (Ollama)</description>
 	<url/>
 	<licenses>
 		<license/>
