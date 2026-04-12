@@ -137,13 +137,17 @@ const UpdateProduct = () => {
   }
 
   return (
-    <div className="container mt-5 pt-5">
+    <div className="container mt-5 pt-5 animate-fade-in-up">
       <div className="row justify-content-center">
         <div className="col-md-10">
-          <div className="card shadow">
+          <div className="card panel-card">
+            <div className="card-header">
+              <h5 className="mb-0">
+                <i className="bi bi-pencil-square me-2"></i>Update Product
+              </h5>
+            </div>
             <div className="card-body">
-              <h2 className="text-center mb-4">Update Product</h2>
-              
+
               <form className="row g-3" noValidate validated={validated.toString()} onSubmit={handleSubmit}>
                 <div className="col-md-6">
                   <label htmlFor="name" className="form-label fw-bold">Name</label>
@@ -304,17 +308,13 @@ const UpdateProduct = () => {
 
                 <div className="col-12 mt-4">
                   {loading ? (
-                    <button
-                      className="btn btn-primary"
-                      type="button"
-                      disabled
-                    >
+                    <button className="btn gradient-btn" type="button" disabled>
                       <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                       Updating...
                     </button>
                   ) : (
-                    <button type="submit" className="btn btn-primary">
-                      Update Product
+                    <button type="submit" className="btn gradient-btn px-4">
+                      <i className="bi bi-check-circle me-1"></i>Update Product
                     </button>
                   )}
                   <button 

@@ -115,15 +115,18 @@ function AskAi() {
   }
 
   return (
-    <div className="container-fluid mt-5 pt-5">
+    <div className="container-fluid mt-5 pt-5 animate-fade-in-up">
       <div className="row justify-content-center">
         <div className="col-md-10 col-lg-8">
-          <div className="card shadow" style={{ height: "80vh" }}>
-            <div className="card-header bg-primary text-white">
+          <div className="card panel-card" style={{ height: "80vh" }}>
+            <div className="card-header d-flex align-items-center">
               <h5 className="mb-0">
                 <i className="bi bi-robot me-2"></i>
                 AI Assistant
               </h5>
+              <span className="badge bg-light text-dark ms-auto" style={{ fontSize: "0.7rem" }}>
+                <i className="bi bi-cpu me-1"></i>Powered by Mistral
+              </span>
             </div>
 
             <div className="card-body p-0" style={{ height: "calc(100% - 56px)" }}>

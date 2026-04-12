@@ -344,13 +344,25 @@ const AddProduct = () => {
   const canGenerateImage = product.name.trim() && product.category && product.description.trim();
 
   return (
-    <div className="container mt-5 pt-5">
+    <div className="container mt-5 pt-5 animate-fade-in-up">
       <div className="row justify-content-center">
         <div className="col-md-10">
-          <div className="card shadow">
+          <div className="card panel-card">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h5 className="mb-0">
+                <i className="bi bi-plus-circle me-2"></i>Add New Product
+              </h5>
+              <button
+                type="button"
+                className="btn btn-sm btn-light fw-semibold"
+                onClick={() => setShowModal(true)}
+              >
+                <i className="bi bi-lightning-charge-fill me-1"></i>
+                Generate with AI
+              </button>
+            </div>
             <div className="card-body">
-              <h2 className="card-title text-center mb-4">Add New Product</h2>
-              
+
               <form className="row g-3 needs-validation" noValidate validated={validated.toString()} onSubmit={submitHandler}>
                 <div className="col-md-6">
                   <label htmlFor="name" className="form-label fw-bold">Name</label>
@@ -596,7 +608,7 @@ const AddProduct = () => {
                   <div className="d-flex gap-2">                  
                     {loading ? (
                       <button
-                        className="btn btn-primary"
+                        className="btn gradient-btn"
                         type="button"
                         disabled
                       >
@@ -604,8 +616,8 @@ const AddProduct = () => {
                         Saving...
                       </button>
                     ) : (
-                      <button type="submit" className="btn btn-primary">
-                        Submit
+                      <button type="submit" className="btn gradient-btn px-4">
+                        <i className="bi bi-check-circle me-1"></i>Submit
                       </button>
                     )}
                   </div>

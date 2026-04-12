@@ -10,6 +10,7 @@ import UpdateProduct from "./components/UpdateProduct";
 import AskAi from "./components/AskAI";
 import SearchResults from "./components/SearchResults";
 import Order from "./components/Order";
+import Footer from "./components/Footer";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { ToastContainer } from "react-toastify";
@@ -19,23 +20,16 @@ function App() {
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
-    console.log("Selected category:", category);
   };
 
   return (
     <AppProvider>
       <BrowserRouter>
-      <ToastContainer autoClose={2000}
-  hideProgressBar={true} />
+        <ToastContainer autoClose={2000} hideProgressBar={true} />
         <Navbar onSelectCategory={handleCategorySelect} />
-        <div className="min-vh-100 bg-light">
+        <div className="min-vh-100">
           <Routes>
-            <Route
-              path="/"
-              element={
-                <Home selectedCategory={selectedCategory} />
-              }
-            />
+            <Route path="/" element={<Home selectedCategory={selectedCategory} />} />
             <Route path="/add_product" element={<AddProduct />} />
             <Route path="/product" element={<Product />} />
             <Route path="product/:id" element={<Product />} />
@@ -46,6 +40,7 @@ function App() {
             <Route path="/orders" element={<Order />} />
           </Routes>
         </div>
+        <Footer />
       </BrowserRouter>
     </AppProvider>
   );

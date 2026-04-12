@@ -1,126 +1,62 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import AppContext from "../Context/Context";
 
 const Navbar = ({ onSelectCategory }) => {
-  const getInitialTheme = () => {
-    const storedTheme = localStorage.getItem("theme");
-    return storedTheme ? storedTheme : "light-theme";
-  };
-  
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [theme, setTheme] = useState(getInitialTheme());
+  const { cart } = useContext(AppContext);
+
   const [input, setInput] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [noResults, setNoResults] = useState(false);
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [showSearchResults, setShowSearchResults] = useState(false);
   const [showNoProductsMessage, setShowNoProductsMessage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isNavCollapsed, setIsNavCollapsed] = useState(true);
+  const navbarRef = useRef(null);
 
-  // 2. Add these new state variables
-const [isNavCollapsed, setIsNavCollapsed] = useState(true);
-const navbarRef = useRef(null);
-  
   const navigate = useNavigate();
   const baseUrl = import.meta.env.VITE_BASE_URL;
 
   useEffect(() => {
-    fetchInitialData();
+    const handleClickOutside = (event) => {
+      if (navbarRef.current && !navbarRef.current.contains(event.target)) {
+        setIsNavCollapsed(true);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 3. Add this to your useEffect or as a separate useEffect
-useEffect(() => {
-  // Add click event listener to close navbar when clicking outside
-  const handleClickOutside = (event) => {
-    if (navbarRef.current && !navbarRef.current.contains(event.target)) {
-      setIsNavCollapsed(true);
-    }
-  };
-  
-  // Add event listener to document when component mounts
-  document.addEventListener("mousedown", handleClickOutside);
-  
-  // Clean up event listener on component unmount
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
+  const handleNavbarToggle = () => setIsNavCollapsed(!isNavCollapsed);
+  const handleLinkClick = () => setIsNavCollapsed(true);
 
-  // Initial data fetch (if needed)
-  const fetchInitialData = async () => {
-    try {
-      const response = await axios.get(`${baseUrl}/api/products`);
-      console.log(response.data, 'navbar initial data');
-    } catch (error) {
-      console.error("Error fetching initial data:", error);
-    }
-  };
+  const handleInputChange = (value) => setInput(value);
 
-// 4. Add these new functions
-// Toggle navbar collapse state
-const handleNavbarToggle = () => {
-  setIsNavCollapsed(!isNavCollapsed);
-};
-
-// Close navbar when a link is clicked
-const handleLinkClick = () => {
-  setIsNavCollapsed(true);
-};
-
-  // Update input value without searching
-  const handleInputChange = (value) => {
-    setInput(value);
-  };
-
-  // Only search when the form is submitted
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (input.trim() === "") return;
-    
     setShowNoProductsMessage(false);
     setIsLoading(true);
     setIsNavCollapsed(true);
-    
     try {
       const response = await axios.get(
         `${baseUrl}/api/products/search?keyword=${input}`
       );
-      setSearchResults(response.data);
-      
       if (response.data.length === 0) {
-        setNoResults(true);
         setShowNoProductsMessage(true);
       } else {
-        // Redirect to search results page with the search data
         navigate(`/search-results`, { state: { searchData: response.data } });
       }
-      
-      console.log("Search results:", response.data);
     } catch (error) {
       console.error("Error searching:", error);
       setShowNoProductsMessage(true);
     } finally {
-      setIsLoading(false); // Hide loader when API call finishes (success or error)
+      setIsLoading(false);
     }
   };
 
   const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
     onSelectCategory(category);
     setIsNavCollapsed(true);
   };
-  
-  const toggleTheme = () => {
-    const newTheme = theme === "dark-theme" ? "light-theme" : "dark-theme";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-  };
-
-  useEffect(() => {
-    document.body.className = theme;
-  }, [theme]);
 
   const categories = [
     "Laptop",
@@ -131,114 +67,110 @@ const handleLinkClick = () => {
     "Fashion",
     "Other",
   ];
-  
+
+  const cartCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+
   return (
-    <nav className="navbar navbar-expand-lg fixed-top bg-white shadow-sm" ref={navbarRef}>
+    <nav className="navbar navbar-expand-lg fixed-top navbar-gradient" ref={navbarRef}>
       <div className="container-fluid">
-        <a className="navbar-brand" href="/">
+        <Link className="navbar-brand" to="/" onClick={handleLinkClick}>
+          <i className="bi bi-lightning-charge-fill brand-icon"></i>
           SpringShop AI
-        </a>
+        </Link>
+
         <button
-  className="navbar-toggler"
-  type="button"
-  onClick={handleNavbarToggle}
-  aria-controls="navbarSupportedContent"
-  aria-expanded={!isNavCollapsed}
-  aria-label="Toggle navigation"
->
-  <span className="navbar-toggler-icon"></span>
-</button>
-        <div
-          className={`${isNavCollapsed ? 'collapse' : ''} navbar-collapse`}
-          id="navbarSupportedContent"
+          className="navbar-toggler"
+          type="button"
+          onClick={handleNavbarToggle}
+          aria-controls="navbarSupportedContent"
+          aria-expanded={!isNavCollapsed}
+          aria-label="Toggle navigation"
         >
+          <span className="navbar-toggler-icon"></span>
+        </button>
+
+        <div className={`${isNavCollapsed ? 'collapse' : ''} navbar-collapse`} id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <a className="nav-link active" aria-current="page" href="/" onClick={handleLinkClick}>
-                Home
-              </a>
+              <Link className="nav-link" to="/" onClick={handleLinkClick}>
+                <i className="bi bi-house-door me-1"></i>Home
+              </Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/add_product" onClick={handleLinkClick}>
-                Add Product
-              </a>
+              <Link className="nav-link" to="/add_product" onClick={handleLinkClick}>
+                <i className="bi bi-plus-circle me-1"></i>Add Product
+              </Link>
             </li>
 
-            {/* Dropdown is commented out in the original code */}
-            {/* <li className="nav-item dropdown">
+            <li className="nav-item dropdown">
               <a
                 className="nav-link dropdown-toggle"
-                href="/"
+                href="#"
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                Categories
+                <i className="bi bi-grid me-1"></i>Categories
               </a>
-
               <ul className="dropdown-menu">
+                <li>
+                  <button className="dropdown-item" onClick={() => handleCategorySelect("")}>
+                    All Products
+                  </button>
+                </li>
+                <li><hr className="dropdown-divider" /></li>
                 {categories.map((category) => (
                   <li key={category}>
-                    <button
-                      className="dropdown-item"
-                      onClick={() => handleCategorySelect(category)}
-                    >
+                    <button className="dropdown-item" onClick={() => handleCategorySelect(category)}>
                       {category}
                     </button>
                   </li>
                 ))}
               </ul>
-            </li> */}
+            </li>
 
             <li className="nav-item">
-              <a className="nav-link" href="/askai" onClick={handleLinkClick}>
-                Ask AI
-              </a>
+              <Link className="nav-link" to="/askai" onClick={handleLinkClick}>
+                <i className="bi bi-robot me-1"></i>Ask AI
+              </Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/orders" onClick={handleLinkClick}>
-                Orders
-              </a>
+              <Link className="nav-link" to="/orders" onClick={handleLinkClick}>
+                <i className="bi bi-receipt me-1"></i>Orders
+              </Link>
             </li>
           </ul>
-          
 
-          
-          <div className="d-flex align-items-center">
-            <a href="/cart" className="nav-link text-dark me-3" onClick={handleLinkClick}>
-              <i className="bi bi-cart me-1"></i>
-              Cart
-            </a>
-            <form className="d-flex" role="search" onSubmit={handleSubmit} id="searchForm">
+          <div className="d-flex align-items-center gap-3">
+            <Link to="/cart" className="cart-link nav-link" onClick={handleLinkClick}>
+              <i className="bi bi-bag"></i>
+              {cartCount > 0 && (
+                <span className="cart-badge badge">{cartCount}</span>
+              )}
+            </Link>
+
+            <form className="d-flex nav-search-form" role="search" onSubmit={handleSubmit}>
               <input
                 className="form-control me-2"
                 type="search"
-                placeholder="type to search"
+                placeholder="Search products..."
                 aria-label="Search"
                 value={input}
                 onChange={(e) => handleInputChange(e.target.value)}
               />
               {isLoading ? (
-                <button
-                  className="btn btn-outline-success"
-                  type="button"
-                  disabled
-                >
+                <button className="btn" type="button" disabled>
                   <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  <span className="visually-hidden">Loading...</span>
                 </button>
               ) : (
-                <button
-                  className="btn btn-outline-success"
-                  type="submit"
-                >
-                  Search
+                <button className="btn" type="submit">
+                  <i className="bi bi-search"></i>
                 </button>
               )}
             </form>
-            
+
             {showNoProductsMessage && (
-              <div className="alert alert-warning position-absolute mt-2" style={{ top: "100%", zIndex: 1000 }}>
+              <div className="alert alert-warning position-absolute mt-2" style={{ top: "100%", zIndex: 1000, right: 16 }}>
                 No products found matching your search.
               </div>
             )}
@@ -250,3 +182,6 @@ const handleLinkClick = () => {
 };
 
 export default Navbar;
+
+
+

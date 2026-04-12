@@ -16,11 +16,8 @@ const Product = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(
-          `${baseUrl}/api/product/${id}`
-        );
+        const response = await axios.get(`${baseUrl}/api/product/${id}`);
         setProduct(response.data);
-        console.log(response.data);
         if (response.data.imageName) {
           fetchImage();
         }
@@ -30,10 +27,7 @@ const Product = () => {
     };
 
     const fetchImage = async () => {
-      const response = await axios.get(
-        `${baseUrl}/api/product/${id}/image`,
-        { responseType: "blob" }
-      );
+      const response = await axios.get(`${baseUrl}/api/product/${id}/image`, { responseType: "blob" });
       setImageUrl(URL.createObjectURL(response.data));
     };
     fetchProduct();
@@ -43,7 +37,6 @@ const Product = () => {
     try {
       await axios.delete(`${baseUrl}/api/product/${id}`);
       removeFromCart(id);
-      console.log("Product deleted successfully");
       toast.success("Product deleted successfully");
       refreshData();
       navigate("/");
@@ -52,13 +45,21 @@ const Product = () => {
     }
   };
 
-  const handleEditClick = () => {
-    navigate(`/product/update/${id}`);
-  };
+  const handleEditClick = () => navigate(`/product/update/${id}`);
 
   const handlAddToCart = () => {
     addToCart(product);
     toast.success("Product added to cart");
+  };
+
+  const getStockInfo = () => {
+    if (!product.productAvailable || product.stockQuantity === 0) {
+      return { label: "Out of Stock", className: "stock-badge-out", icon: "bi-x-circle" };
+    }
+    if (product.stockQuantity <= 5) {
+      return { label: `Only ${product.stockQuantity} left`, className: "stock-badge-low", icon: "bi-exclamation-triangle" };
+    }
+    return { label: `${product.stockQuantity} in stock`, className: "stock-badge-in", icon: "bi-check-circle" };
   };
 
   if (!product) {
@@ -73,73 +74,77 @@ const Product = () => {
     );
   }
 
+  const stockInfo = getStockInfo();
+
   return (
-    <div className="container mt-5 pt-5">
-      <div className="row">
-        {/* Product Image */}
-        <div className="col-md-6 mb-4">
-          <div className="card border-0">
-            <img
-              src={imageUrl}
-              alt={product.name}
-              className="card-img-top img-fluid"
-              style={{ maxHeight: "500px", objectFit: "contain" }}
-            />
-          </div>
-        </div>
-
-        {/* Product Details */}
-        <div className="col-md-6">
-          <div className="d-flex justify-content-between align-items-center mb-2">
-            <span className="badge bg-secondary">{product.category}</span>
-            <small className="text-muted">
-              Listed: {new Date(product.releaseDate).toLocaleDateString()}
-            </small>
+    <div className="container mt-5 pt-5 animate-fade-in-up">
+      <div className="card panel-card border-0 p-4" style={{ borderRadius: "var(--radius-lg)" }}>
+        <div className="row g-4">
+          {/* Product Image */}
+          <div className="col-md-6">
+            <div className="product-detail-img-wrapper">
+              <img
+                src={imageUrl}
+                alt={product.name}
+                className="img-fluid"
+                style={{ maxHeight: "400px", objectFit: "contain" }}
+              />
+            </div>
           </div>
 
-          <h2 className="text-capitalize mb-1">{product.name}</h2>
-          <p className="text-muted fst-italic mb-4">~ {product.brand}</p>
+          {/* Product Details */}
+          <div className="col-md-6">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <span className="badge bg-light text-dark border px-3 py-2">
+                <i className="bi bi-grid me-1"></i>{product.category}
+              </span>
+              <small className="text-muted">
+                <i className="bi bi-calendar3 me-1"></i>
+                {new Date(product.releaseDate).toLocaleDateString()}
+              </small>
+            </div>
 
-          <div className="mb-4">
-            <h5 className="mb-2">Product Description:</h5>
-            <p>{product.description}</p>
-          </div>
+            <h2 className="fw-bold text-capitalize mb-1">{product.name}</h2>
+            <p className="text-muted mb-4">
+              <i className="bi bi-tag me-1"></i>{product.brand}
+            </p>
 
-          <h3 className="fw-bold mb-3">₹ {product.price}</h3>
+            <div className="mb-4">
+              <h6 className="text-muted text-uppercase" style={{ fontSize: "0.75rem", letterSpacing: "1px" }}>Description</h6>
+              <p className="lh-lg">{product.description}</p>
+            </div>
 
-          <div className="d-grid gap-2 mb-3">
-            <button
-              className="btn btn-primary btn-lg"
-              onClick={handlAddToCart}
-              disabled={!product.productAvailable || product.stockQuantity == 0}
-            >
-              {product.stockQuantity !== 0 ? "Add to Cart" : "Out of Stock"}
-            </button>
-          </div>
+            <div className="d-flex align-items-center gap-3 mb-4">
+              <h2 className="mb-0 fw-bold" style={{ color: "var(--primary)" }}>
+                ₹ {product.price}
+              </h2>
+              <span className={`badge rounded-pill px-3 py-2 ${stockInfo.className}`} style={{ fontSize: "0.8rem", background: "transparent" }}>
+                <i className={`bi ${stockInfo.icon} me-1`}></i>{stockInfo.label}
+              </span>
+            </div>
 
-          <p className="mb-4">
-            <span className="me-2">Stock Available:</span>
-            <span className="fw-bold text-success">{product.stockQuantity}</span>
-          </p>
+            <div className="d-grid gap-2 mb-4">
+              <button
+                className="btn btn-add-cart btn-lg py-3"
+                onClick={handlAddToCart}
+                disabled={!product.productAvailable || product.stockQuantity === 0}
+              >
+                {product.stockQuantity !== 0 ? (
+                  <><i className="bi bi-bag-plus me-2"></i>Add to Cart</>
+                ) : (
+                  <><i className="bi bi-x-circle me-2"></i>Out of Stock</>
+                )}
+              </button>
+            </div>
 
-          <div className="d-flex gap-2">
-            <button
-              className="btn btn-outline-primary"
-              type="button"
-              onClick={handleEditClick}
-            >
-              <i className="bi bi-pencil me-1"></i>
-              Update
-            </button>
-
-            <button
-              className="btn btn-outline-danger"
-              type="button"
-              onClick={deleteProduct}
-            >
-              <i className="bi bi-trash me-1"></i>
-              Delete
-            </button>
+            <div className="d-flex gap-2">
+              <button className="btn btn-outline-primary" type="button" onClick={handleEditClick}>
+                <i className="bi bi-pencil me-1"></i>Update
+              </button>
+              <button className="btn btn-outline-danger" type="button" onClick={deleteProduct}>
+                <i className="bi bi-trash me-1"></i>Delete
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -148,3 +153,4 @@ const Product = () => {
 };
 
 export default Product;
+
