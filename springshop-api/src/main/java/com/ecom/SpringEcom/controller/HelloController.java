@@ -8,7 +8,7 @@ public class HelloController {
 
     @GetMapping("/hello")
     public String greet(){
-        return "Welcome to Telusko";
+        return "Welcome to Spring E-commerce API!";
     }
 
 }
