@@ -22,8 +22,9 @@ const UpdateProduct = () => {
   const [imageChanged, setImageChanged] = useState(false);
   const [validated, setValidated] = useState(false);
   const [errors, setErrors] = useState({});
-    const [loading, setLoading] = useState(false);
-  
+  const [loading, setLoading] = useState(false);
+  const [generatingDescription, setGeneratingDescription] = useState(false);
+
 
   const baseUrl = import.meta.env.VITE_BASE_URL;
 
@@ -122,7 +123,59 @@ const UpdateProduct = () => {
       setImageChanged(true); // Mark that user has selected a new image
     }
   };
-  
+
+  const generateDescription = async () => {
+    if (!updateProduct.name?.trim() || !updateProduct.category) {
+      toast.warning("Please enter product name and select a category first");
+      return;
+    }
+
+    setGeneratingDescription(true);
+    setUpdateProduct(prev => ({ ...prev, description: "" }));
+
+    try {
+      const response = await fetch(
+        `${baseUrl}/api/product/stream-description?name=${encodeURIComponent(updateProduct.name)}&category=${encodeURIComponent(updateProduct.category)}`,
+        { method: "POST" }
+      );
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || "Failed to generate description");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+        for (const line of lines) {
+          if (line.startsWith("data:")) {
+            accumulated += line.slice(5);
+          } else if (line.trim() !== "") {
+            accumulated += line;
+          }
+        }
+
+        setUpdateProduct(prev => ({ ...prev, description: accumulated }));
+      }
+
+      toast.success("Description generated successfully!");
+    } catch (error) {
+      console.error("Error generating description:", error);
+      toast.error(error.message || "Failed to generate description. Please try again.");
+    } finally {
+      setGeneratingDescription(false);
+    }
+  };
+
+  const canGenerateDescription = updateProduct.name?.trim() && updateProduct.category;
+
 
   if (!product.id) {
     return (
@@ -137,6 +190,7 @@ const UpdateProduct = () => {
   }
 
   return (
+
     <div className="container mt-5 pt-5 animate-fade-in-up">
       <div className="row justify-content-center">
         <div className="col-md-10">
@@ -180,7 +234,28 @@ const UpdateProduct = () => {
                 </div>
                 
                 <div className="col-12">
-                  <label htmlFor="description" className="form-label fw-bold">Description</label>
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <label htmlFor="description" className="form-label fw-bold mb-0">Description</label>
+                    <button
+                      type="button"
+                      className={`btn btn-sm btn-outline-primary ${!canGenerateDescription ? 'disabled' : ''}`}
+                      onClick={generateDescription}
+                      disabled={!canGenerateDescription || generatingDescription}
+                      title={!canGenerateDescription ? "Please enter product name and select category first" : "Generate/rephrase description with AI"}
+                    >
+                      {generatingDescription ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <i className="bi bi-robot me-1"></i>
+                          {updateProduct.description?.trim() ? 'Rephrase with AI' : 'Generate with AI'}
+                        </>
+                      )}
+                    </button>
+                  </div>
                   <textarea
                     className={`form-control ${validated && errors.description ? 'is-invalid' : ''}`}
                     placeholder={product.description}
