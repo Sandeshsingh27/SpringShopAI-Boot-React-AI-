@@ -19,28 +19,23 @@ export const AppProvider = ({ children }) => {
   const baseUrl = import.meta.env.VITE_BASE_URL;
 
   const addToCart = (product) => {
-    const existingProductIndex = cart.findIndex((item) => item.id === product.id);
-    if (existingProductIndex !== -1) {
-      const updatedCart = cart.map((item, index) =>
-        index === existingProductIndex
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
-      setCart(updatedCart);
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-    } else {
-      const updatedCart = [...cart, { ...product, quantity: 1 }];
-      setCart(updatedCart);
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-    }
+    // Strip imageData to avoid localStorage quota overflow
+    const { imageData, ...lightProduct } = product;
+    setCart(prev => {
+      const existingIndex = prev.findIndex((item) => item.id === lightProduct.id);
+      if (existingIndex !== -1) {
+        return prev.map((item, index) =>
+          index === existingIndex
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, { ...lightProduct, quantity: 1 }];
+    });
   };
 
   const removeFromCart = (productId) => {
-    console.log("productID",productId)
-    const updatedCart = cart.filter((item) => item.id !== productId);
-    setCart(updatedCart);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
-    console.log("CART",cart)
+    setCart(prev => prev.filter((item) => item.id !== productId));
   };
 
   const refreshData = async () => {
@@ -52,10 +47,11 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const clearCart =() =>{
+  const clearCart = () => {
     setCart([]);
-  }
-  
+    localStorage.removeItem('cart');
+  };
+
   useEffect(() => {
     refreshData();
   }, []);

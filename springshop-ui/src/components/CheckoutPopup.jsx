@@ -2,9 +2,9 @@ import axios from 'axios';
 import React, { useState } from 'react';
 import { Modal, Button, Form, Alert, Toast, ToastContainer } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import unplugged from "../assets/unplugged.png";
 
-const CheckoutPopup = ({ show, handleClose, cartItems, totalPrice }) => {
-  const baseUrl = import.meta.env.VITE_BASE_URL;
+const CheckoutPopup = ({ show, handleClose, cartItems, totalPrice, onCheckoutSuccess, baseUrl }) => {
   const navigate = useNavigate();
 
   const [name, setName] = useState('');
@@ -48,8 +48,8 @@ const CheckoutPopup = ({ show, handleClose, cartItems, totalPrice }) => {
       setToastMessage('Order placed successfully!');
       setShowToast(true);
 
-      // Clear cart and redirect after a short delay
-      localStorage.removeItem('cart');
+      // Clear cart (context + localStorage) and redirect
+      if (onCheckoutSuccess) onCheckoutSuccess();
       setTimeout(() => {
         navigate('/');
       }, 2000);
@@ -62,21 +62,8 @@ const CheckoutPopup = ({ show, handleClose, cartItems, totalPrice }) => {
       setIsSubmitting(false);
     }
   };
-  const convertBase64ToDataURL = (base64String, mimeType = 'image/jpeg') => {
-    if (!base64String) return unplugged; // Return fallback image if no data
-
-    // If it's already a data URL, return as is
-    if (base64String.startsWith('data:')) {
-      return base64String;
-    }
-
-    // If it's already a URL, return as is
-    if (base64String.startsWith('http')) {
-      return base64String;
-    }
-
-    // Convert base64 string to data URL
-    return `data:${mimeType};base64,${base64String}`;
+  const getProductImageUrl = (item) => {
+    return `${baseUrl}/api/product/${item.id}/image`;
   };
   return (
     <>
@@ -90,10 +77,11 @@ const CheckoutPopup = ({ show, handleClose, cartItems, totalPrice }) => {
               {cartItems.map((item) => (
                 <div key={item.id} className="d-flex mb-3 border-bottom pb-3">
                   <img
-                    src={convertBase64ToDataURL(item.imageData)}
+                    src={getProductImageUrl(item)}
                     alt={item.name}
                     className="me-3 rounded"
                     style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                    onError={(e) => { e.target.src = unplugged; }}
                   />
                   <div className="flex-grow-1">
                     <h6 className="mb-1">{item.name}</h6>

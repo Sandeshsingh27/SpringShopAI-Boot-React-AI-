@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import AppContext from "../Context/Context";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import CheckoutPopup from "./CheckoutPopup";
 import unplugged from "../assets/unplugged.png";
 
@@ -9,7 +8,6 @@ const Cart = () => {
   const { cart, removeFromCart, clearCart } = useContext(AppContext);
   const [cartItems, setCartItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [cartImage, setCartImage] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
   const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -51,32 +49,14 @@ const Cart = () => {
     setCartItems(cartItems.filter((item) => item.id !== itemId));
   };
 
-  const convertBase64ToDataURL = (base64String, mimeType = 'image/jpeg') => {
-    if (!base64String) return unplugged;
-    if (base64String.startsWith('data:')) return base64String;
-    if (base64String.startsWith('http')) return base64String;
-    return `data:${mimeType};base64,${base64String}`;
+  const getProductImageUrl = (item) => {
+    return `${baseUrl}/api/product/${item.id}/image`;
   };
 
-  const handleCheckout = async () => {
-    try {
-      for (const item of cartItems) {
-        const { imageUrl, imageName, imageData, imageType, quantity, ...rest } = item;
-        const updatedStockQuantity = item.stockQuantity - item.quantity;
-        const updatedProductData = { ...rest, stockQuantity: updatedStockQuantity };
-        const cartProduct = new FormData();
-        cartProduct.append("imageFile", cartImage);
-        cartProduct.append("product", new Blob([JSON.stringify(updatedProductData)], { type: "application/json" }));
-        await axios.put(`${baseUrl}/api/product/${item.id}`, cartProduct, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-      }
-      clearCart();
-      setCartItems([]);
-      setShowModal(false);
-    } catch (error) {
-      console.log("error during checkout", error);
-    }
+  const handleCheckoutSuccess = () => {
+    clearCart();
+    setCartItems([]);
+    setShowModal(false);
   };
 
   return (
@@ -119,12 +99,13 @@ const Cart = () => {
                             <td>
                               <div className="d-flex align-items-center">
                                 <img
-                                  src={convertBase64ToDataURL(item.imageData)}
+                                  src={getProductImageUrl(item)}
                                   alt={item.name}
                                   className="rounded me-3"
                                   width="64"
                                   height="64"
                                   style={{ objectFit: "cover", background: "#f8fafc" }}
+                                  onError={(e) => { e.target.src = unplugged; }}
                                 />
                                 <div>
                                   <h6 className="mb-0 fw-bold">{item.name}</h6>
@@ -185,7 +166,8 @@ const Cart = () => {
         handleClose={() => setShowModal(false)}
         cartItems={cartItems}
         totalPrice={totalPrice}
-        handleCheckout={handleCheckout}
+        onCheckoutSuccess={handleCheckoutSuccess}
+        baseUrl={baseUrl}
       />
     </div>
   );

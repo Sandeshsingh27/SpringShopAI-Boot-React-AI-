@@ -14,6 +14,7 @@ function AskAi() {
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
   const conversationIdRef = useRef(crypto.randomUUID());
+  const abortControllerRef = useRef(null);
 
   // Prefer env var; fallback helps during local dev
   const baseUrl = import.meta.env.VITE_BASE_URL ?? 'http://localhost:8080';
@@ -27,6 +28,13 @@ function AskAi() {
         direction: "incoming"
       }
     ]);
+  }, []);
+
+  const handleStop = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
   }, []);
 
   const handleSend = useCallback(async (messageText) => {
@@ -43,13 +51,32 @@ function AskAi() {
     try {
       await streamMessageFromBot(messageText);
     } catch (err) {
-      setError(err.message || 'Something went wrong.');
+      if (err.name === 'AbortError') {
+        // User stopped the stream — append a note to the partial response
+        setMessages(prev => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last && last.sender === "AI") {
+            updated[updated.length - 1] = {
+              ...last,
+              message: last.message + "\n\n⏹ [Response stopped]"
+            };
+          }
+          return updated;
+        });
+      } else {
+        setError(err.message || 'Something went wrong.');
+      }
     } finally {
       setIsTyping(false);
+      abortControllerRef.current = null;
     }
   }, [baseUrl]);
 
   async function streamMessageFromBot(chatMessage) {
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     const url = `${baseUrl}/api/chat/stream`;
 
     const response = await fetch(url, {
@@ -58,7 +85,8 @@ function AskAi() {
       body: JSON.stringify({
         message: chatMessage,
         conversationId: conversationIdRef.current
-      })
+      }),
+      signal: controller.signal
     });
 
     if (!response.ok) {
@@ -84,33 +112,37 @@ function AskAi() {
 
     let accumulated = "";
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      const chunk = decoder.decode(value, { stream: true });
+        const chunk = decoder.decode(value, { stream: true });
 
-      // Parse SSE data lines: "data:token\n\n"
-      const lines = chunk.split("\n");
-      for (const line of lines) {
-        if (line.startsWith("data:")) {
-          const token = line.slice(5);
-          accumulated += token;
-        } else if (line.trim() !== "") {
-          // Some SSE implementations send raw tokens without "data:" prefix
-          accumulated += line;
+        // Parse SSE data lines: "data:token\n\n"
+        const lines = chunk.split("\n");
+        for (const line of lines) {
+          if (line.startsWith("data:")) {
+            const token = line.slice(5);
+            accumulated += token;
+          } else if (line.trim() !== "") {
+            // Some SSE implementations send raw tokens without "data:" prefix
+            accumulated += line;
+          }
         }
-      }
 
-      // Update the last message with accumulated text
-      setMessages(prev => {
-        const updated = [...prev];
-        updated[updated.length - 1] = {
-          ...updated[updated.length - 1],
-          message: accumulated
-        };
-        return updated;
-      });
+        // Update the last message with accumulated text
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            ...updated[updated.length - 1],
+            message: accumulated
+          };
+          return updated;
+        });
+      }
+    } finally {
+      reader.releaseLock();
     }
   }
 
@@ -146,12 +178,48 @@ function AskAi() {
                     ))}
                   </MessageList>
 
-                  <MessageInput
-                    placeholder="Type your message here..."
-                    onSend={handleSend}
-                    attachButton={false}
-                    disabled={isTyping}
-                  />
+                  {isTyping ? (
+                    <div
+                      as="MessageInput"
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        padding: "12px",
+                        borderTop: "1px solid #e2e8f0",
+                        background: "#f8fafc"
+                      }}
+                    >
+                      <button
+                        onClick={handleStop}
+                        className="btn"
+                        style={{
+                          background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "24px",
+                          padding: "8px 28px",
+                          fontWeight: "600",
+                          fontSize: "0.9rem",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          boxShadow: "0 2px 8px rgba(239,68,68,0.3)",
+                          transition: "all 0.2s ease"
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
+                        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                      >
+                        <i className="bi bi-stop-circle-fill"></i>
+                        Stop Generating
+                      </button>
+                    </div>
+                  ) : (
+                    <MessageInput
+                      placeholder="Type your message here..."
+                      onSend={handleSend}
+                      attachButton={false}
+                    />
+                  )}
                 </ChatContainer>
               </MainContainer>
             </div>
