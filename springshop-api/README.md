@@ -87,6 +87,7 @@ Key dependencies from `pom.xml`:
 | `spring-boot-docker-compose` | Auto-start Docker containers on boot |
 | `lombok` | Boilerplate reduction (`@Data`, `@Builder`, etc.) |
 | `spring-boot-starter-test` | Testing framework |
+| `springdoc-openapi-starter-webmvc-ui` | Swagger UI & OpenAPI 3 documentation |
 
 Dependency management is handled via the **Spring AI BOM** (`spring-ai-bom:1.1.0`).
 
@@ -220,6 +221,11 @@ mvnw.cmd spring-boot:run      # Windows
 
 The API will start at **http://localhost:8080**.
 
+#### Swagger UI (API Documentation)
+Once the backend is running, interactive API docs are available at:
+- **Swagger UI**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- **OpenAPI JSON**: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+
 On first startup:
 1. Auto-creates the `vector_store` table via `init/schema.sql` (768 dimensions for nomic-embed-text)
 2. Auto-creates JPA entity tables (`spring.jpa.hibernate.ddl-auto=update`)
@@ -269,8 +275,9 @@ springshop-api/
 └── src/main/
     ├── java/com/ecom/SpringEcom/
     │   ├── SpringEcomApplication.java            # Main entry point
-    │   ├── config/
-    │   │   └── ChatClientConfig.java             # ChatClient + ChatMemory beans
+|     │   ├── config/
+|     │   │   ├── ChatClientConfig.java             # ChatClient + ChatMemory beans
+|     │   │   └── OpenApiConfig.java                # Swagger / OpenAPI 3 configuration
     │   ├── controller/
     │   │   ├── ProductController.java            # Product REST API + AI endpoints
     │   │   ├── OrderController.java              # Order REST API

@@ -74,6 +74,7 @@ SpringShop AI is a modern e-commerce platform that combines traditional online s
 | 💬 **AI Chatbot (RAG)** | Ask about products, orders, shipping, returns — chatbot retrieves context from PgVector + DB |
 | 🔎 **Order Lookup by Name** | Chatbot can find orders by customer name or order ID |
 | 📊 **Vector Store Sync** | Product & order data are auto-embedded into PgVector for chatbot context |
+| 📝 **Swagger UI** | Interactive API documentation via SpringDoc OpenAPI 3 |
 | 🏷️ **Category Filtering** | Filter products by category from the navbar dropdown |
 | 🎨 **Modern UI** | Gradient theme, animations, hover effects, stock badges, responsive design |
 ---
@@ -88,6 +89,7 @@ SpringShop AI is a modern e-commerce platform that combines traditional online s
 | **PostgreSQL 16 + PgVector** | Relational database with vector similarity search |
 | **Docker Compose** | Container orchestration for PostgreSQL |
 | **Lombok** | Boilerplate code reduction |
+| **SpringDoc OpenAPI** | Swagger UI & OpenAPI 3 API documentation |
 | **Ollama — Mistral** | Local LLM for chat, description & product generation |
 | **Ollama — nomic-embed-text** | Local text embeddings for vector store (768 dimensions) |
 ### Frontend (`springshop-ui`)
@@ -159,6 +161,12 @@ cd springshop-api
 mvnw.cmd spring-boot:run      # Windows
 ```
 The backend API will start at **http://localhost:8080**.
+
+#### Swagger UI (API Documentation)
+Once running, explore all endpoints interactively:
+- **Swagger UI**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- **OpenAPI JSON**: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+
 On first startup, the app will:
 1. Auto-create the `vector_store` table via `init/schema.sql` (768 dimensions for nomic-embed-text)
 2. Auto-create JPA entity tables (`spring.jpa.hibernate.ddl-auto=update`)
@@ -261,6 +269,7 @@ SpringShopAI [Boot+React+AI]/
 |       |   +-- SpringEcomApplication.java   # Main entry point
 |       |   +-- config/
 |       |   |   +-- ChatClientConfig.java    # Spring AI ChatClient + ChatMemory beans
+|       |   |   +-- OpenApiConfig.java       # Swagger / OpenAPI 3 configuration
 |       |   +-- controller/
 |       |   |   +-- ProductController.java   # Product REST API + AI endpoints
 |       |   |   +-- OrderController.java     # Order REST API
