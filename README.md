@@ -153,7 +153,28 @@ This spins up a **PostgreSQL 16** instance with the **PgVector** extension:
 | Username | `postgres` |
 | Password | `0076` |
 > **Note:** Spring Boot uses `spring-boot-docker-compose` to automatically detect and start the Docker container. You can skip this step — the backend will start it for you.
-#### b. Run the Backend
+#### b. Set Java 21 (if another Java version is installed system-wide)
+If your system's default Java is not version 21 (e.g., Java 8 or 17), you need to point `JAVA_HOME` to a Java 21 JDK **in your current terminal session** before running the backend:
+```powershell
+# Windows PowerShell — set JAVA_HOME to your Java 21 installation path
+$env:JAVA_HOME = "<path to JDK 21>"
+$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+
+# Verify
+java -version   # Should show: openjdk version "21.x.x"
+```
+```bash
+# macOS / Linux
+export JAVA_HOME=/path/to/jdk-21
+export PATH="$JAVA_HOME/bin:$PATH"
+
+java -version   # Should show: openjdk version "21.x.x"
+```
+> **Tip:** You can find your installed JDKs on Windows at `%USERPROFILE%\.jdks\` (IntelliJ-managed), `C:\Program Files\Eclipse Adoptium\`, or `C:\Program Files\Java\`. On macOS/Linux, check `/usr/lib/jvm/` or use `update-alternatives --list java`.
+>
+> This only affects the current terminal session — it does **not** change your system-wide Java version.
+
+#### c. Run the Backend
 ```bash
 cd springshop-api
 # Using Maven Wrapper

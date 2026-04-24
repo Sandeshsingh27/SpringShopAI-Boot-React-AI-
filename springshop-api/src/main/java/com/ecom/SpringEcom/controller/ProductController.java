@@ -2,6 +2,8 @@ package com.ecom.SpringEcom.controller;
 
 import com.ecom.SpringEcom.model.Product;
 import com.ecom.SpringEcom.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,17 +19,20 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @CrossOrigin
+@Tag(name = "Products", description = "Product CRUD operations and product search")
 public class ProductController {
 
     @Autowired
     private ProductService productService;
 
+    @Operation(summary = "Get all products", description = "Retrieves a list of all products in the catalog.")
     @GetMapping("/products")
     public ResponseEntity<List<Product>> getProducts(){
         return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
 
     }
 
+    @Operation(summary = "Get product by ID", description = "Retrieves a single product by its ID. Returns 404 if not found.")
     @GetMapping("/product/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable int id){
         Product product = productService.getProductById(id);
@@ -39,6 +44,7 @@ public class ProductController {
 
     }
 
+    @Operation(summary = "Get product image", description = "Returns the raw image bytes for a product by its ID. Returns 404 if the product does not exist.")
     @GetMapping("product/{productId}/image")
     public ResponseEntity<byte[]> getImageByProductId(@PathVariable int productId){
         Product product = productService.getProductById(productId);
@@ -48,6 +54,7 @@ public class ProductController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @Operation(summary = "Generate product via AI", description = "Generates a complete product JSON (name, brand, price, category, description, etc.) from a text prompt using the Ollama Mistral LLM.")
     @PostMapping("/product/generate-product")
     public ResponseEntity<String> generateProduct(@RequestParam String query){
         try{
@@ -60,6 +67,7 @@ public class ProductController {
         }
     }
 
+    @Operation(summary = "Generate product description via AI", description = "Generates a concise, customer-friendly product description (max 250 chars) using Ollama Mistral, given a product name and category.")
     @PostMapping("/product/generate-description")
     public ResponseEntity<String> generateDescription(@RequestParam String name, @RequestParam String category){
 
@@ -72,12 +80,14 @@ public class ProductController {
 
     }
 
+    @Operation(summary = "Stream product description via AI (SSE)", description = "Streams an AI-generated product description token-by-token as Server-Sent Events (SSE) using Ollama Mistral.")
     @PostMapping(value = "/product/stream-description", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> streamDescription(@RequestParam String name, @RequestParam String category) {
         return productService.streamDescription(name, category)
                 .onErrorComplete();
     }
 
+    @Operation(summary = "Generate product image via AI", description = "Generates a professional e-commerce product image using AI. Note: Currently unavailable with Ollama — upload images manually instead.")
     @PostMapping("/product/generate-image")
     public ResponseEntity<?> generateImage(@RequestParam String name, @RequestParam String category, @RequestParam String description){
         try{
@@ -89,6 +99,7 @@ public class ProductController {
     }
 
 
+    @Operation(summary = "Add a new product", description = "Creates a new product with optional image upload. The product data is also embedded into the PgVector store for chatbot RAG retrieval.")
     @PostMapping("/product")
     public ResponseEntity<?> addProduct(@RequestPart Product product, @RequestPart(required = false) MultipartFile imageFile){
         Product savedProduct = null;
@@ -100,6 +111,7 @@ public class ProductController {
         }
     }
 
+    @Operation(summary = "Update a product", description = "Updates an existing product by ID with optional image replacement. The updated product data is re-embedded into PgVector.")
     @PutMapping("/product/{id}")
     public ResponseEntity<String> updateProduct(@PathVariable int id, @RequestPart Product product, @RequestPart @Nullable MultipartFile imageFile){
         Product updatedProduct = null;
@@ -112,6 +124,7 @@ public class ProductController {
         }
     }
 
+    @Operation(summary = "Delete a product", description = "Deletes a product by its ID. Returns 404 if the product does not exist.")
     @DeleteMapping("/product/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable int id){
         Product product = productService.getProductById(id);
@@ -125,6 +138,7 @@ public class ProductController {
 
     }
 
+    @Operation(summary = "Search products by keyword", description = "Searches for products matching the given keyword across name, description, brand, and category fields.")
     @GetMapping("/products/search")
     public ResponseEntity<List<Product>> searchProducts(@RequestParam String keyword){
         List<Product> products = productService.searchProducts(keyword);
